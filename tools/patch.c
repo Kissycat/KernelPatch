@@ -137,9 +137,24 @@ void print_preset_info(preset_t *preset)
     fprintf(stdout, "config=%s,%s\n", is_android ? "android" : "linux", is_debug ? "debug" : "release");
     fprintf(stdout, "superkey=%s\n", setup->superkey);
 
+    // todo: remove compat code
+    if (ver_num > 0xa04) {
+        char buf[SUPER_KEY_HASH_LEN * 2 + 1];
+        buf[SUPER_KEY_HASH_LEN * 2] = '\0';
+        for (int i = 0; i < SUPER_KEY_HASH_LEN; i++) {
+            sprintf(&buf[2 * i], "%02x", setup->superkey_hash[i]);
+        }
+        fprintf(stdout, "superkey_hash=%s\n", buf);
+    }
+
     fprintf(stdout, INFO_ADDITIONAL_SESSION "\n");
-    char *pos = setup->additional;
-    while (pos < setup->additional + ADDITIONAL_LEN) {
+    char *addition = setup->additional;
+    // todo: remove compat code
+    if (ver_num <= 0xa04) {
+        addition -= (SUPER_KEY_HASH_LEN + SETUP_PRESERVE_LEN);
+    }
+    char *pos = addition;
+    while (pos < addition + ADDITIONAL_LEN) {
         int len = *pos;
         if (!len) break;
         pos++;
@@ -258,8 +273,6 @@ int print_image_patch_info(patched_kimg_t *pimg)
     if (preset) {
         print_preset_info(preset);
 
-        fprintf(stdout, "extra_num=%d\n", pimg->embed_item_num);
-
         fprintf(stdout, INFO_EXTRA_SESSION "\n");
         fprintf(stdout, "num=%d\n", pimg->embed_item_num);
 
@@ -316,7 +329,7 @@ static void extra_append(char *kimg, const void *data, int len, int *offset)
 }
 
 int patch_update_img(const char *kimg_path, const char *kpimg_path, const char *out_path, const char *superkey,
-                     const char **additional, const char *kpatch_path, extra_config_t *extra_configs,
+                     bool hash_key, const char **additional, const char *kpatch_path, extra_config_t *extra_configs,
                      int extra_config_num)
 {
     set_log_enable(true);

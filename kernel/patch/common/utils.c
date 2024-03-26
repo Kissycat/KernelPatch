@@ -15,7 +15,7 @@
 #include <linux/err.h>
 #include <linux/errno.h>
 
-int kfunc_def(xt_data_to_user)(void __user *dst, const void *src, int usersize, int size, int aligned_size);
+extern int kfunc_def(xt_data_to_user)(void __user *dst, const void *src, int usersize, int size, int aligned_size);
 
 static inline int compat_xt_data_copy_to_user(void __user *dst, const void *src, int size)
 {
@@ -23,11 +23,12 @@ static inline int compat_xt_data_copy_to_user(void __user *dst, const void *src,
 }
 
 // todo: static method
-int kfunc_def(bits_to_user)(unsigned long *bits, unsigned int maxbit, unsigned int maxlen, void __user *p, int compat);
+extern int kfunc_def(bits_to_user)(unsigned long *bits, unsigned int maxbit, unsigned int maxlen, void __user *p,
+                                   int compat);
 
 static inline int compat_bits_copy_to_user(void __user *dst, const void *src, int size)
 {
-    kfunc_direct_call(bits_to_user, src, size * sizeof(long), size, dst, 0);
+    kfunc_direct_call(bits_to_user, (unsigned long *)src, size * sizeof(unsigned long), size, dst, 0);
 }
 
 // todo: n > page_size
@@ -45,7 +46,7 @@ int trace_seq_copy_to_user(void __user *to, const void *from, int n)
     *pfull = 0;
     if (n > page_size) return 0;
     memcpy(pbuffer, from, n);
-    int sz = trace_seq_to_user(trace_seq, to, n);
+    int sz = kfunc(trace_seq_to_user)(trace_seq, to, n);
     return sz;
 }
 
@@ -56,29 +57,31 @@ int seq_buf_copy_to_user(void __user *to, const void *from, int n)
     seq_buf.len = n;
     seq_buf.readpos = 0;
     seq_buf.buffer = (void *)from;
-    return seq_buf_to_user(&seq_buf, to, n);
+    return kfunc(seq_buf_to_user)(&seq_buf, to, n);
 }
 
 // return copied length
 int __must_check compat_copy_to_user(void __user *to, const void *from, int n)
 {
-    int copy_len;
+    int copy_len = 0;
     if (kfunc(seq_buf_to_user)) {
         copy_len = seq_buf_copy_to_user((void *__user)to, from, n);
-    } else if (kfunc(bits_to_user)) {
-        // bits_to_user, str_to_user
-        // int ret = compat_bits_to_user(to, from, n);
-        // if (ret == n) return -EFAULT;
-        // copy_len -= ret;
-    } else if (kfunc(xt_data_to_user)) {
-        // xt_data_to_user, xt_obj_to_user
-        // int ret = compat_xt_data_copy_to_user(to, from, n);
-        // if (ret == n) return -EFAULT;
-        // copy_len -= ret;
-    } else {
+        // }
+        //  else if (kfunc(bits_to_user)) {
+        //     // bits_to_user, str_to_user
+        //     int ret = compat_bits_copy_to_user(to, from, n);
+        //     if (ret == n) return -EFAULT;
+        //     copy_len = n - ret;
+        // } else if (kfunc(xt_data_to_user)) {
+        //     // xt_data_to_user, xt_obj_to_user
+        //     int ret = compat_xt_data_copy_to_user(to, from, n);
+        //     if (ret == n) return -EFAULT;
+        //     copy_len = n - ret;
+    } else if (kfunc(trace_seq_to_user)) {
         copy_len = trace_seq_copy_to_user((void *__user)to, from, n);
+    } else {
+        // alt: copy_arg_to_user,
     }
-    // alt: copy_arg_to_user,
     return copy_len;
 }
 KP_EXPORT_SYMBOL(compat_copy_to_user);

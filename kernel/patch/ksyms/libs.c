@@ -207,38 +207,29 @@ static void _linux_lib_argv_split_sym_match(const char *name, unsigned long addr
 #include <linux/trace_seq.h>
 
 int kfunc_def(seq_buf_printf)(struct seq_buf *s, const char *fmt, ...) = 0;
-KP_EXPORT_SYMBOL(kfunc(seq_buf_printf));
 int kfunc_def(seq_buf_to_user)(struct seq_buf *s, char __user *ubuf, int cnt) = 0;
-KP_EXPORT_SYMBOL(kfunc(seq_buf_to_user));
 int kfunc_def(seq_buf_puts)(struct seq_buf *s, const char *str) = 0;
-KP_EXPORT_SYMBOL(kfunc(seq_buf_puts));
 int kfunc_def(seq_buf_putc)(struct seq_buf *s, unsigned char c) = 0;
-KP_EXPORT_SYMBOL(kfunc(seq_buf_putc));
 int kfunc_def(seq_buf_putmem)(struct seq_buf *s, const void *mem, unsigned int len) = 0;
-KP_EXPORT_SYMBOL(kfunc(seq_buf_putmem));
 int kfunc_def(seq_buf_putmem_hex)(struct seq_buf *s, const void *mem, unsigned int len) = 0;
-KP_EXPORT_SYMBOL(kfunc(seq_buf_putmem_hex));
 int kfunc_def(seq_buf_bitmask)(struct seq_buf *s, const unsigned long *maskp, int nmaskbits) = 0;
-KP_EXPORT_SYMBOL(kfunc(seq_buf_bitmask));
 
 int kfunc_def(trace_seq_printf)(struct trace_seq *s, const char *fmt, ...) = 0;
-KP_EXPORT_SYMBOL(kfunc(trace_seq_printf));
 int kfunc_def(trace_seq_to_user)(struct trace_seq *s, char __user *ubuf, int cnt) = 0;
-KP_EXPORT_SYMBOL(kfunc(trace_seq_to_user));
 int kfunc_def(trace_seq_puts)(struct trace_seq *s, const char *str) = 0;
-KP_EXPORT_SYMBOL(kfunc(trace_seq_puts));
 int kfunc_def(trace_seq_putc)(struct trace_seq *s, unsigned char c) = 0;
-KP_EXPORT_SYMBOL(kfunc(trace_seq_putc));
 int kfunc_def(trace_seq_putmem)(struct trace_seq *s, const void *mem, unsigned int len) = 0;
-KP_EXPORT_SYMBOL(kfunc(trace_seq_putmem));
 int kfunc_def(trace_seq_putmem_hex)(struct trace_seq *s, const void *mem, unsigned int len) = 0;
-KP_EXPORT_SYMBOL(kfunc(trace_seq_putmem_hex));
 int kfunc_def(trace_seq_bitmask)(struct trace_seq *s, const unsigned long *maskp, int nmaskbits) = 0;
-KP_EXPORT_SYMBOL(kfunc(trace_seq_bitmask));
+
+int kfunc_def(xt_data_to_user)(void __user *dst, const void *src, int usersize, int size, int aligned_size) = 0;
+int kfunc_def(bits_to_user)(unsigned long *bits, unsigned int maxbit, unsigned int maxlen, void __user *p,
+                            int compat) = 0;
 
 static void _linux_lib_seq_buf_sym_match(const char *name, unsigned long addr)
 {
     kfunc_match(seq_buf_to_user, name, addr);
+    kfunc_match(trace_seq_to_user, name, addr);
     if (kfunc(seq_buf_to_user)) {
         kfunc_match(seq_buf_printf, name, addr);
         kfunc_match(seq_buf_puts, name, addr);
@@ -248,7 +239,6 @@ static void _linux_lib_seq_buf_sym_match(const char *name, unsigned long addr)
         // kfunc_match(seq_buf_bitmask, name, addr);
     } else {
         kfunc_match(trace_seq_printf, name, addr);
-        kfunc_match(trace_seq_to_user, name, addr);
         kfunc_match(trace_seq_puts, name, addr);
         // kfunc_match(trace_seq_putc, name, addr);
         kfunc_match(trace_seq_putmem, name, addr);

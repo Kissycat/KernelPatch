@@ -138,13 +138,14 @@ int patch()
         ret |= rc;
     }
 
-    // kernel_init
-    unsigned long kernel_init_addr = get_preset_patch_sym()->kernel_init;
-    if (kernel_init_addr) {
-        hook_err_t rc = hook_wrap4((void *)kernel_init_addr, before_kernel_init, after_kernel_init, 0);
-        log_boot("hook rc: %d\n", rc);
-        ret |= rc;
-    }
+    log_boot("kernel init: %llx\n", get_preset_patch_sym()->kernel_init - kernel_va);
+    // // kernel_init
+    // unsigned long kernel_init_addr = get_preset_patch_sym()->kernel_init;
+    // if (kernel_init_addr) {
+    //     hook_err_t rc = hook_wrap4((void *)kernel_init_addr, before_kernel_init, after_kernel_init, 0);
+    //     log_boot("hook rc: %d\n", rc);
+    //     ret |= rc;
+    // }
 
     return ret;
 }
