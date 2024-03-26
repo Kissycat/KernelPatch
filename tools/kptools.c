@@ -51,6 +51,7 @@ void print_usage(char **argv)
         "  -i, --image PATH                 Kernel image path.\n"
         "  -k, --kpimg PATH                 KernelPatch image path.\n"
         "  -s, --skey PATH                  Set superkey.\n"
+        // "  -S, --skey PATH                  Set superkey .\n"
         "  -o, --out PATH                   Patched image path.\n"
         "  -a  --addition KEY=VALUE         Add additional information.\n"
 

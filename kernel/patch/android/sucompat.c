@@ -35,20 +35,14 @@
 #include <predata.h>
 #include <kconfig.h>
 #include <linux/vmalloc.h>
+#include <sucompat.h>
+#include <symbol.h>
 #include <uapi/linux/limits.h>
 
 static const char sh_path[] = ANDROID_SH_PATH;
 static const char default_su_path[] = ANDROID_SU_PATH;
 static const char *current_su_path = 0;
 static const char apd_path[] = APD_PATH;
-
-struct allow_uid
-{
-    uid_t uid;
-    struct su_profile profile;
-    struct list_head list;
-    struct rcu_head rcu;
-};
 
 static struct list_head allow_uid_list;
 static spinlock_t list_lock;
@@ -59,7 +53,7 @@ static void allow_reclaim_callback(struct rcu_head *rcu)
     kvfree(allow);
 }
 
-static struct su_profile search_allow_uid(uid_t uid)
+struct su_profile profile_su_allow_uid(uid_t uid)
 {
     rcu_read_lock();
     struct allow_uid *pos;
@@ -75,8 +69,9 @@ static struct su_profile search_allow_uid(uid_t uid)
     rcu_read_unlock();
     return profile;
 }
+KP_EXPORT_SYMBOL(profile_su_allow_uid);
 
-static int is_allow_uid(uid_t uid)
+int is_su_allow_uid(uid_t uid)
 {
     rcu_read_lock();
     struct allow_uid *pos;
@@ -90,6 +85,7 @@ static int is_allow_uid(uid_t uid)
     rcu_read_unlock();
     return 0;
 }
+KP_EXPORT_SYMBOL(is_su_allow_uid);
 
 int su_add_allow_uid(uid_t uid, struct su_profile *profile, int async)
 {
@@ -267,8 +263,8 @@ static void handle_before_execve(hook_local_t *hook_local, char **__user u_filen
 
     if (!strcmp(current_su_path, filename)) {
         uid_t uid = current_uid();
-        if (!is_allow_uid(uid)) return;
-        struct su_profile profile = search_allow_uid(uid);
+        if (!is_su_allow_uid(uid)) return;
+        struct su_profile profile = profile_su_allow_uid(uid);
 
         uid_t to_uid = profile.to_uid;
         const char *sctx = profile.scontext;
@@ -446,7 +442,7 @@ static void su_handler_arg1_ufilename_before(hook_fargs6_t *args, void *udata)
     args->local.data0 = 0;
 
     uid_t uid = current_uid();
-    if (!is_allow_uid(uid)) return;
+    if (!is_su_allow_uid(uid)) return;
 
     char __user *ufilename = (char __user *)syscall_argn(args, 1);
     char filename[SU_PATH_MAX_LEN];

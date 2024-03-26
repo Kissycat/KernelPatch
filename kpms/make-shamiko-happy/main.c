@@ -15,6 +15,7 @@
 #include <linux/sched.h>
 #include <linux/cred.h>
 #include <linux/string.h>
+#include <sucompat.h>
 
 KPM_NAME("make-shamiko-happy");
 KPM_VERSION("1.0.0");
@@ -49,12 +50,13 @@ void prctl_before(hook_fargs6_t *args, void *udata)
         int rc = compat_copy_to_user((void *)arg2, &version, 4);
         printk("fake ksu version: %d, %d", version, rc);
     } else if (cmd == 12 || cmd == 13) {
-        bool res;
+        // TODO: default behavior,
+        uid_t uid = arg2;
+        bool res = is_su_allow_uid(uid);
         if (cmd == 13) {
-            res = true;
+            res = !res;
             printk("fake ksu unmount: uid: %d\n", arg2);
         } else {
-            res = false;
             printk("fake ksu allow: uid: %d\n", arg2);
         }
         compat_copy_to_user((void *)arg3, &res, sizeof(res));

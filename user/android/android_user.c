@@ -162,6 +162,7 @@ static void fork_for_result(const char *exec, char *const *argv)
     if (pid < 0) {
         log_kernel("%d fork %s error: %d\n", getpid(), exec, pid);
     } else if (pid == 0) {
+        setenv("KERNELPATCH", "true", 1);
         setenv("SUPERKEY", key, 1);
         char kpver[16] = { '\0' }, kver[16] = { '\0' };
         sprintf(kpver, "%x", sc_kp_ver(key));
