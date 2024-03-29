@@ -198,26 +198,23 @@ static long supercall(long cmd, long arg1, long arg2, long arg3, long arg4)
     return NO_SYSCALL;
 }
 
-static long hash_key_val = 0;
-
 static void before(hook_fargs6_t *args, void *udata)
 {
     const char *__user ukey = (const char *__user)syscall_argn(args, 0);
-    long hash_cmd = (long)syscall_argn(args, 1);
+    long ver_xx_cmd = (long)syscall_argn(args, 1);
     long a1 = (long)syscall_argn(args, 2);
     long a2 = (long)syscall_argn(args, 3);
     long a3 = (long)syscall_argn(args, 4);
     long a4 = (long)syscall_argn(args, 5);
 
-    long cmd = hash_cmd & 0xFFFF;
-    long hash = hash_cmd & 0xFFFF0000;
-
-    if ((hash_key_val & 0xFFFF0000) != hash) return;
+    uint32_t ver = (ver_xx_cmd & 0xFFFFFFFF00000000ul) >> 32;
+    long xx = (ver_xx_cmd & 0xFFFF0000) >> 16;
+    long cmd = ver_xx_cmd & 0xFFFF;
 
     char key[MAX_KEY_LEN];
     long len = compact_strncpy_from_user(key, ukey, MAX_KEY_LEN);
     if (len <= 0) return;
-    if (superkey_auth(key)) return;
+    if (auth_superkey(key)) return;
 
     args->skip_origin = 1;
     args->ret = supercall(cmd, a1, a2, a3, a4);
@@ -226,7 +223,6 @@ static void before(hook_fargs6_t *args, void *udata)
 int supercall_install()
 {
     int rc = 0;
-    hash_key_val = hash_key(get_superkey());
 
     // hook_err_t err = inline_hook_syscalln(__NR_supercall, 6, before, 0, 0);
     hook_err_t err = fp_hook_syscalln(__NR_supercall, 6, before, 0, 0);

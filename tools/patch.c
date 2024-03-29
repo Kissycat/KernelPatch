@@ -22,6 +22,7 @@
 #include "preset.h"
 #include "symbol.h"
 #include "kpm.h"
+#include "sha256.h"
 
 void read_kernel_file(const char *path, kernel_file_t *kernel_file)
 {
@@ -122,6 +123,16 @@ const char *extra_type_str(extra_item_type extra_type)
     }
 }
 
+static char *bytes_to_hexstr(const unsigned char *data, int len)
+{
+    char *buf = (char *)malloc(2 * len + 1);
+    buf[2 * len] = '\0';
+    for (int i = 0; i < len; i++) {
+        sprintf(&buf[2 * i], "%02x", data[i]);
+    }
+    return buf;
+}
+
 void print_preset_info(preset_t *preset)
 {
     setup_header_t *header = &preset->header;
@@ -137,19 +148,16 @@ void print_preset_info(preset_t *preset)
     fprintf(stdout, "config=%s,%s\n", is_android ? "android" : "linux", is_debug ? "debug" : "release");
     fprintf(stdout, "superkey=%s\n", setup->superkey);
 
-    // todo: remove compat code
+    // todo: remove compat version
     if (ver_num > 0xa04) {
-        char buf[SUPER_KEY_HASH_LEN * 2 + 1];
-        buf[SUPER_KEY_HASH_LEN * 2] = '\0';
-        for (int i = 0; i < SUPER_KEY_HASH_LEN; i++) {
-            sprintf(&buf[2 * i], "%02x", setup->superkey_hash[i]);
-        }
-        fprintf(stdout, "superkey_hash=%s\n", buf);
+        char *hexstr = bytes_to_hexstr(setup->superkey_hash, SUPER_KEY_HASH_LEN);
+        fprintf(stdout, "superkey_hash=%s\n", hexstr);
+        free(hexstr);
     }
 
     fprintf(stdout, INFO_ADDITIONAL_SESSION "\n");
     char *addition = setup->additional;
-    // todo: remove compat code
+    // todo: remove compat version
     if (ver_num <= 0xa04) {
         addition -= (SUPER_KEY_HASH_LEN + SETUP_PRESERVE_LEN);
     }
@@ -539,8 +547,21 @@ int patch_update_img(const char *kimg_path, const char *kpimg_path, const char *
     fillin_patch_symbol(&kallsym, kallsym_kimg, ori_kimg_len, &setup->patch_symbol, kinfo->is_be, 0);
 
     // superkey
-    strncpy((char *)setup->superkey, superkey, SUPER_KEY_LEN - 1);
-    tools_logi("superkey: %s\n", setup->superkey);
+    if (!hash_key) {
+        tools_logi("superkey: %s\n", superkey);
+        strncpy((char *)setup->superkey, superkey, SUPER_KEY_LEN - 1);
+    } else {
+        int len = SHA256_BLOCK_SIZE > SUPER_KEY_HASH_LEN ? SUPER_KEY_HASH_LEN : SHA256_BLOCK_SIZE;
+        BYTE buf[SHA256_BLOCK_SIZE];
+        SHA256_CTX ctx;
+        sha256_init(&ctx);
+        sha256_update(&ctx, (const BYTE *)superkey, strnlen(superkey, SUPER_KEY_LEN));
+        sha256_final(&ctx, buf);
+        memcpy(setup->superkey_hash, buf, len);
+        char *hexstr = bytes_to_hexstr(setup->superkey_hash, len);
+        tools_logi("superkey hash: %s\n", hexstr);
+        free(hexstr);
+    }
 
     // modify kernel entry
     int paging_init_offset = get_symbol_offset_exit(&kallsym, kallsym_kimg, "paging_init");

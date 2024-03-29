@@ -51,7 +51,7 @@ void print_usage(char **argv)
         "  -i, --image PATH                 Kernel image path.\n"
         "  -k, --kpimg PATH                 KernelPatch image path.\n"
         "  -s, --skey KEY                   Set the superkey and save it directly in the boot.img.\n"
-        "  -S, --skey-hash KEY              Set the superkey and use its sha256 for verification. This option will override the -s option.\n"
+        "  -S, --skey-hash KEY              Consistent with (-s), but store the hash value of skey.\n"
         "  -o, --out PATH                   Patched image path.\n"
         "  -a  --addition KEY=VALUE         Add additional information.\n"
 

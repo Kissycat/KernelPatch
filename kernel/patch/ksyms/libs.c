@@ -11,11 +11,9 @@
 
 // lib/dump_stack.c
 void kfunc_def(dump_stack_lvl)(const char *log_lvl) = 0;
-KP_EXPORT_SYMBOL(kfunc(dump_stack_lvl));
 void kfunc_def(dump_stack)(void) = 0;
-KP_EXPORT_SYMBOL(kfunc(dump_stack));
 
-static void _linux_lib_dump_stack_sym_match(const char *name, unsigned long addr)
+static void _linux_lib_misc(const char *name, unsigned long addr)
 {
     kfunc_match(dump_stack_lvl, name, addr);
     kfunc_match(dump_stack, name, addr);
@@ -259,7 +257,7 @@ static void _linux_include_kernel_sym_match(const char *name, unsigned long addr
 
 static int _linux_libs_symbol_init(void *data, const char *name, struct module *m, unsigned long addr)
 {
-    _linux_lib_dump_stack_sym_match(name, addr);
+    _linux_lib_misc(name, addr);
     _linux_lib_strncpy_from_user_sym_match(name, addr);
     _linux_lib_string_sym_match(name, addr);
     _linux_lib_argv_split_sym_match(name, addr);

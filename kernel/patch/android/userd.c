@@ -10,6 +10,7 @@
 #include <asm-generic/compat.h>
 #include <uapi/asm-generic/errno.h>
 #include <syscall.h>
+#include <symbol.h>
 #include <kconfig.h>
 #include <linux/uaccess.h>
 #include <linux/string.h>
@@ -366,6 +367,9 @@ static void after_openat(hook_fargs4_t *args, void *udata)
 #define EV_KEY 0x01
 #define KEY_VOLUMEDOWN 114
 
+int android_is_safe_mode = 0;
+KP_EXPORT_SYMBOL(android_is_safe_mode);
+
 // void input_handle_event(struct input_dev *dev, unsigned int type, unsigned int code, int value)
 static void before_input_handle_event(hook_fargs4_t *args, void *udata)
 {
@@ -377,6 +381,7 @@ static void before_input_handle_event(hook_fargs4_t *args, void *udata)
         volumedown_pressed_count++;
         if (volumedown_pressed_count == 3) {
             log_boot("entering safemode ...");
+            android_is_safe_mode = 1;
             struct file *filp = filp_open(SAFE_MODE_FLAG_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0666);
             if (filp && !IS_ERR(filp)) filp_close(filp, 0);
         }
@@ -389,22 +394,22 @@ int kpuserd_init()
     hook_err_t rc = HOOK_NO_ERR;
 
     rc = fp_hook_syscalln(__NR_execve, 3, before_execve, after_execve, (void *)__NR_execve);
-    log_boot("hook rc: %d\n", rc);
+    log_boot("hook __NR_execve rc: %d\n", rc);
     ret |= rc;
 
     rc = fp_hook_syscalln(__NR_execveat, 5, before_execveat, after_execveat, (void *)__NR_execveat);
-    log_boot("hook rc: %d\n", rc);
+    log_boot("hook __NR_execveat rc: %d\n", rc);
     ret |= rc;
 
     rc = fp_hook_syscalln(__NR_openat, 4, before_openat, after_openat, 0);
-    log_boot("hook rc: %d\n", rc);
+    log_boot("hook __NR_openat rc: %d\n", rc);
     ret |= rc;
 
     unsigned long input_handle_event_addr = get_preset_patch_sym()->input_handle_event;
     if (!input_handle_event_addr) {
         rc = hook_wrap4((void *)input_handle_event_addr, before_input_handle_event, 0, 0);
         ret |= rc;
-        log_boot("hook rc: %d\n", rc);
+        log_boot("hook input_handle_event rc: %d\n", rc);
     }
 
     return ret;

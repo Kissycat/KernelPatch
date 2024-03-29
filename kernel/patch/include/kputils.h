@@ -13,6 +13,8 @@ int __must_check compat_copy_to_user(void __user *to, const void *from, int n);
 
 void *__user copy_to_user_stack(const void *data, int len);
 
+char *random_string(int len);
+
 void print_bootlog();
 
 #endif

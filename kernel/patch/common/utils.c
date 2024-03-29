@@ -14,6 +14,7 @@
 #include <linux/ptrace.h>
 #include <linux/err.h>
 #include <linux/errno.h>
+#include <linux/random.h>
 
 extern int kfunc_def(xt_data_to_user)(void __user *dst, const void *src, int usersize, int size, int aligned_size);
 
@@ -87,7 +88,6 @@ int __must_check compat_copy_to_user(void __user *to, const void *from, int n)
         logke("no compat_copy_to_user\n");
         // copy_arg_to_user,
     }
-    logkd("copy rc %d\n", cplen);
     return cplen;
 }
 KP_EXPORT_SYMBOL(compat_copy_to_user);
@@ -148,3 +148,20 @@ void *__user __must_check copy_to_user_stack(const void *data, int len)
     return cplen > 0 ? (void *__user)addr : (void *)(long)cplen;
 }
 KP_EXPORT_SYMBOL(copy_to_user_stack);
+
+uint64_t get_random_u64(void)
+{
+    // kfunc_call(get_random_u64);
+    // kfunc_call(get_random_long);
+    // _rand_next = 1103515245 * _rand_next + 12345;
+    // return _rand_next;
+}
+
+char *random_string(int len)
+{
+    char buff[128];
+    if (kfunc(get_random_bytes)) {
+        get_random_bytes(buff, len);
+    } else {
+    }
+}

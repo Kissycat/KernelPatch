@@ -341,7 +341,7 @@ static void handle_before_execve(hook_local_t *hook_local, char **__user u_filen
         // auth key
         char arg1[SUPER_KEY_LEN];
         if (compact_strncpy_from_user(arg1, p1, sizeof(arg1)) <= 0) return;
-        if (superkey_auth(arg1)) return;
+        if (auth_superkey(arg1)) return;
 
         commit_su(0, 0);
 
@@ -488,32 +488,36 @@ int su_compat_init()
     spin_lock_init(&list_lock);
 
     // default shell
-    struct su_profile default_shell_profile = {
+    struct su_profile default_allow_profile = {
         .uid = 2000,
         .to_uid = 0,
         .scontext = ALL_ALLOW_SCONTEXT,
     };
-    su_add_allow_uid(default_shell_profile.uid, &default_shell_profile, 1);
+    su_add_allow_uid(default_allow_profile.uid, &default_allow_profile, 1);
+
+    // default root
+    default_allow_profile.uid = 0;
+    su_add_allow_uid(default_allow_profile.uid, &default_allow_profile, 1);
 
     hook_err_t rc = HOOK_NO_ERR;
 
     rc = fp_hook_syscalln(__NR_execve, 3, before_execve, after_execve, (void *)__NR_execve);
-    log_boot("hook rc: %d\n", rc);
+    log_boot("hook __NR_execve rc: %d\n", rc);
 
     rc = fp_hook_syscalln(__NR_execveat, 5, before_execveat, after_execveat, (void *)__NR_execveat);
-    log_boot("hook rc: %d\n", rc);
+    log_boot("hook __NR_execveat rc: %d\n", rc);
 
     rc = fp_hook_syscalln(__NR3264_fstatat, 4, su_handler_arg1_ufilename_before, su_handler_arg1_ufilename_after,
                           (void *)__NR3264_fstatat);
-    log_boot("hook rc: %d\n", rc);
+    log_boot("hook __NR3264_fstatat rc: %d\n", rc);
 
     rc = fp_hook_syscalln(__NR_faccessat, 3, su_handler_arg1_ufilename_before, su_handler_arg1_ufilename_after,
                           (void *)__NR_faccessat);
-    log_boot("hook rc: %d\n", rc);
+    log_boot("hook __NR_faccessat rc: %d\n", rc);
 
     rc = fp_hook_syscalln(__NR_faccessat2, 4, su_handler_arg1_ufilename_before, su_handler_arg1_ufilename_after,
                           (void *)__NR_faccessat2);
-    log_boot("hook rc: %d\n", rc);
+    log_boot("hook __NR_faccessat2 rc: %d\n", rc);
 
     return rc;
 }

@@ -69,7 +69,7 @@ static void handler_fstat(hook_fargs6_t *args, void *udata)
 static long minit(const char *args, const char *event, void *__user reserved)
 {
     hook_err_t rc = fp_hook_syscalln(__NR3264_fstatat, 4, handler_fstat, 0, (void *)__NR3264_fstatat);
-    pr_info("hook rc: %d\n", rc);
+    pr_info("hook __NR3264_fstatat rc: %d\n", rc);
 
     return 0;
 }

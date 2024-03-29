@@ -26,6 +26,11 @@ static inline long hash_key(const char *key)
 #define SUPERCALL_KERNELPATCH_VER 0x1008
 #define SUPERCALL_KERNEL_VER 0x1009
 
+#define SUPERCALL_SKEY_GET 0x100a
+#define SUPERCALL_SKEY_SET 0x100b
+#define SUPERCALL_SKEY_RAND 0x100c
+#define SUPERCALL_SKEY_HASH_AUTH 0x100d
+
 #define SUPERCALL_SU 0x1010
 #define SUPERCALL_SU_TASK 0x1011 // syscall(__NR_gettid)
 
@@ -73,8 +78,8 @@ struct su_profile
 
 #define ADB_FLODER "/data/adb/"
 #define APATCH_FLODER "/data/adb/ap/"
-#define APATCH_BIN_FLODER "/data/adb/ap/bin/"
-#define APATCH_LOG_FLODER "/data/adb/ap/log/"
+#define APATCH_BIN_FLODER APATCH_FLODER "bin/"
+#define APATCH_LOG_FLODER APATCH_FLODER "log/"
 #define SAFE_MODE_FLAG_FILE "/dev/.safemode"
 #define EARLY_INIT_LOG_0 "/dev/early_init_0.log"
 #define EARLY_INIT_LOG_1 "/dev/early_init_1.log"
