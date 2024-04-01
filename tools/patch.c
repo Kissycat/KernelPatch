@@ -150,8 +150,8 @@ void print_preset_info(preset_t *preset)
 
     // todo: remove compat version
     if (ver_num > 0xa04) {
-        char *hexstr = bytes_to_hexstr(setup->superkey_hash, SUPER_KEY_HASH_LEN);
-        fprintf(stdout, "superkey_hash=%s\n", hexstr);
+        char *hexstr = bytes_to_hexstr(setup->superkey_hash, ROOT_SUPER_KEY_HASH_LEN);
+        fprintf(stdout, "root_superkey=%s\n", hexstr);
         free(hexstr);
     }
 
@@ -159,7 +159,7 @@ void print_preset_info(preset_t *preset)
     char *addition = setup->additional;
     // todo: remove compat version
     if (ver_num <= 0xa04) {
-        addition -= (SUPER_KEY_HASH_LEN + SETUP_PRESERVE_LEN);
+        addition -= (ROOT_SUPER_KEY_HASH_LEN + SETUP_PRESERVE_LEN);
     }
     char *pos = addition;
     while (pos < addition + ADDITIONAL_LEN) {
@@ -337,7 +337,7 @@ static void extra_append(char *kimg, const void *data, int len, int *offset)
 }
 
 int patch_update_img(const char *kimg_path, const char *kpimg_path, const char *out_path, const char *superkey,
-                     bool hash_key, const char **additional, const char *kpatch_path, extra_config_t *extra_configs,
+                     bool root_key, const char **additional, const char *kpatch_path, extra_config_t *extra_configs,
                      int extra_config_num)
 {
     set_log_enable(true);
@@ -547,11 +547,11 @@ int patch_update_img(const char *kimg_path, const char *kpimg_path, const char *
     fillin_patch_symbol(&kallsym, kallsym_kimg, ori_kimg_len, &setup->patch_symbol, kinfo->is_be, 0);
 
     // superkey
-    if (!hash_key) {
+    if (!root_key) {
         tools_logi("superkey: %s\n", superkey);
         strncpy((char *)setup->superkey, superkey, SUPER_KEY_LEN - 1);
     } else {
-        int len = SHA256_BLOCK_SIZE > SUPER_KEY_HASH_LEN ? SUPER_KEY_HASH_LEN : SHA256_BLOCK_SIZE;
+        int len = SHA256_BLOCK_SIZE > ROOT_SUPER_KEY_HASH_LEN ? ROOT_SUPER_KEY_HASH_LEN : SHA256_BLOCK_SIZE;
         BYTE buf[SHA256_BLOCK_SIZE];
         SHA256_CTX ctx;
         sha256_init(&ctx);
@@ -559,7 +559,7 @@ int patch_update_img(const char *kimg_path, const char *kpimg_path, const char *
         sha256_final(&ctx, buf);
         memcpy(setup->superkey_hash, buf, len);
         char *hexstr = bytes_to_hexstr(setup->superkey_hash, len);
-        tools_logi("superkey hash: %s\n", hexstr);
+        tools_logi("root superkey hash: %s\n", hexstr);
         free(hexstr);
     }
 

@@ -14,7 +14,7 @@
 #define MAGIC_LEN 0x8
 #define KP_HEADER_SIZE 0x40
 #define SUPER_KEY_LEN 0x40
-#define SUPER_KEY_HASH_LEN 0x20
+#define ROOT_SUPER_KEY_HASH_LEN 0x20
 #define SETUP_PRESERVE_LEN 0x40
 #define HDR_BACKUP_SIZE 0x8
 #define COMPILE_TIME_LEN 0x18
@@ -234,7 +234,7 @@ typedef struct _setup_preset_t
     map_symbol_t map_symbol;
     uint8_t header_backup[HDR_BACKUP_SIZE];
     uint8_t superkey[SUPER_KEY_LEN];
-    uint8_t superkey_hash[SUPER_KEY_HASH_LEN];
+    uint8_t superkey_hash[ROOT_SUPER_KEY_HASH_LEN];
     uint8_t __[SETUP_PRESERVE_LEN];
     patch_symbol_t patch_symbol;
     char additional[ADDITIONAL_LEN];
@@ -257,7 +257,7 @@ typedef struct _setup_preset_t
 #define setup_header_backup_offset (setup_map_symbol_offset + MAP_SYMBOL_SIZE)
 #define setup_superkey_offset (setup_header_backup_offset + HDR_BACKUP_SIZE)
 #define setup_superkey_hash_offset (setup_superkey_offset + SUPER_KEY_LEN)
-#define setup_patch_symbol_offset (setup_superkey_hash_offset + SUPER_KEY_HASH_LEN + SETUP_PRESERVE_LEN)
+#define setup_patch_symbol_offset (setup_superkey_hash_offset + ROOT_SUPER_KEY_HASH_LEN + SETUP_PRESERVE_LEN)
 #define setup_end (setup_patch_symbol_offset + PATCH_SYMBOL_LEN)
 #endif
 

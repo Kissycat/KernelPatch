@@ -51,7 +51,7 @@ void print_usage(char **argv)
         "  -i, --image PATH                 Kernel image path.\n"
         "  -k, --kpimg PATH                 KernelPatch image path.\n"
         "  -s, --skey KEY                   Set the superkey and save it directly in the boot.img.\n"
-        "  -S, --skey-hash KEY              Consistent with (-s), but store the hash value of skey.\n"
+        "  -S, --root-skey KEY              Set the root-superkey that uses hash verification, and the superkey can be changed dynamically.\n"
         "  -o, --out PATH                   Patched image path.\n"
         "  -a  --addition KEY=VALUE         Add additional information.\n"
 
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     char *out_path = NULL;
     char *superkey = NULL;
     char *kpatch_path = NULL;
-    bool do_hash_key = false;
+    bool root_skey = false;
 
     int additional_num = 0;
     const char *additional[16] = { 0 };
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
             kpimg_path = optarg;
             break;
         case 'S':
-            do_hash_key = true;
+            root_skey = true;
         case 's':
             superkey = optarg;
             break;
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
         else
             fprintf(stdout, "%x\n", version);
     } else if (cmd == 'p') {
-        ret = patch_update_img(kimg_path, kpimg_path, out_path, superkey, do_hash_key, additional, kpatch_path,
+        ret = patch_update_img(kimg_path, kpimg_path, out_path, superkey, root_skey, additional, kpatch_path,
                                extra_configs, extra_config_num);
     } else if (cmd == 'd') {
         ret = dump_kallsym(kimg_path);

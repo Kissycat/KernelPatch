@@ -173,7 +173,7 @@ static long supercall(long cmd, long arg1, long arg2, long arg3, long arg4)
         break;
     case SUPERCALL_SKEY_RAND:
         break;
-    case SUPERCALL_SKEY_TRY_HASH_AUTH:
+    case SUPERCALL_SKEY_ROOT_ENABLE:
         break;
     }
 

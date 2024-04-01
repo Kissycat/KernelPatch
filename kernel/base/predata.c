@@ -34,7 +34,7 @@ int auth_superkey(const char *key)
     sha256_init(&ctx);
     sha256_update(&ctx, (const BYTE *)key, lib_strnlen(key, SUPER_KEY_LEN));
     sha256_final(&ctx, hash);
-    int len = SHA256_BLOCK_SIZE > SUPER_KEY_HASH_LEN ? SUPER_KEY_HASH_LEN : SHA256_BLOCK_SIZE;
+    int len = SHA256_BLOCK_SIZE > ROOT_SUPER_KEY_HASH_LEN ? ROOT_SUPER_KEY_HASH_LEN : SHA256_BLOCK_SIZE;
     rc = lib_memcmp(superkey_hash, hash, len);
 
     return rc;

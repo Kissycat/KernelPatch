@@ -56,6 +56,36 @@ static inline uint32_t sc_k_ver(const char *key)
     return (uint32_t)ret;
 }
 
+static inline uint32_t sc_skey_get(const char *key, char *out_key, int outlen)
+{
+    if (!key || !key[0]) return -EINVAL;
+    if (outlen < SUPERCALL_KEY_MAX_LEN) return -EINVAL;
+    long ret = syscall(__NR_supercall, key, ver_and_cmd(key, SUPERCALL_SKEY_GET), out_key, outlen);
+    return (uint32_t)ret;
+}
+
+static inline uint32_t sc_skey_set(const char *key, const char *new_key)
+{
+    if (!key || !key[0]) return -EINVAL;
+    if (!new_key || !new_key[0]) return -EINVAL;
+    long ret = syscall(__NR_supercall, key, ver_and_cmd(key, SUPERCALL_SKEY_SET), new_key);
+    return (uint32_t)ret;
+}
+
+static inline uint32_t sc_skey_rand(const char *key)
+{
+    if (!key || !key[0]) return -EINVAL;
+    long ret = syscall(__NR_supercall, key, ver_and_cmd(key, SUPERCALL_SKEY_RAND));
+    return (uint32_t)ret;
+}
+
+static inline uint32_t sc_skey_root_enable(const char *key, bool enable)
+{
+    if (!key || !key[0]) return -EINVAL;
+    long ret = syscall(__NR_supercall, key, ver_and_cmd(key, SUPERCALL_SKEY_ROOT_ENABLE), (long)enable);
+    return (uint32_t)ret;
+}
+
 static inline long sc_su(const char *key, struct su_profile *profile)
 {
     if (!key || !key[0]) return -EINVAL;
