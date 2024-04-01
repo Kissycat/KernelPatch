@@ -162,13 +162,13 @@ static void fork_for_result(const char *exec, char *const *argv)
     if (pid < 0) {
         log_kernel("%d fork %s error: %d\n", getpid(), exec, pid);
     } else if (pid == 0) {
-        setenv("KERNELPATCH", "true", 1);
-        setenv("SUPERKEY", key, 1);
+        setenv("KERNEL_PATCH", "true", 1);
         char kpver[16] = { '\0' }, kver[16] = { '\0' };
         sprintf(kpver, "%x", sc_kp_ver(key));
-        setenv("KERNELPATCH_VERSION", kpver, 1);
+        setenv("KERNEL_PATCH_VER", kpver, 1);
         sprintf(kver, "%x", sc_k_ver(key));
-        setenv("KERNEL_VERSION", kver, 1);
+        setenv("KERNEL_VER", kver, 1);
+        setenv("SUPERKEY", key, 1);
         int rc = execv(exec, argv);
         log_kernel("%d exec %s error: %s\n", getpid(), cmd, strerror(errno));
     } else {
@@ -205,15 +205,6 @@ static void save_dmegs(const char *file)
         NULL,
     };
     save_log(dmesg_argv, file);
-}
-
-static void save_logcat(const char *file)
-{
-    char *argv[] = {
-        "/system/bin/logcat",
-        NULL,
-    };
-    save_log(argv, file);
 }
 
 static void early_init()

@@ -165,6 +165,18 @@ static long supercall(long cmd, long arg1, long arg2, long arg3, long arg4)
     case SUPERCALL_KERNEL_VER:
         return kver;
     }
+
+    switch (cmd) {
+    case SUPERCALL_SKEY_GET:
+        break;
+    case SUPERCALL_SKEY_SET:
+        break;
+    case SUPERCALL_SKEY_RAND:
+        break;
+    case SUPERCALL_SKEY_TRY_HASH_AUTH:
+        break;
+    }
+
     switch (cmd) {
     case SUPERCALL_SU:
         return call_su((struct su_profile * __user) arg1);
@@ -207,8 +219,8 @@ static void before(hook_fargs6_t *args, void *udata)
     long a3 = (long)syscall_argn(args, 4);
     long a4 = (long)syscall_argn(args, 5);
 
-    uint32_t ver = (ver_xx_cmd & 0xFFFFFFFF00000000ul) >> 32;
-    long xx = (ver_xx_cmd & 0xFFFF0000) >> 16;
+    // uint32_t ver = (ver_xx_cmd & 0xFFFFFFFF00000000ul) >> 32;
+    // long xx = (ver_xx_cmd & 0xFFFF0000) >> 16;
     long cmd = ver_xx_cmd & 0xFFFF;
 
     char key[MAX_KEY_LEN];
@@ -224,7 +236,6 @@ int supercall_install()
 {
     int rc = 0;
 
-    // hook_err_t err = inline_hook_syscalln(__NR_supercall, 6, before, 0, 0);
     hook_err_t err = fp_hook_syscalln(__NR_supercall, 6, before, 0, 0);
     if (err) {
         log_boot("install supercall hook error: %d\n", err);
