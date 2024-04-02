@@ -720,14 +720,19 @@ static void _linux_seccomp_sym_match(const char *name, unsigned long addr)
 
 void kfunc_def(panic)(const char *fmt, ...) __noreturn __cold = 0;
 int kfunc_def(call_usermodehelper)(const char *path, char **argv, char **envp, int wait) = 0;
+
 // /drivers/char/random.c
 void kfunc_def(get_random_bytes)(void *buf, int nbytes) = 0;
+uint64_t kfunc_def(get_random_u64)(void) = 0;
+uint64_t kfunc_def(get_random_long)(void) = 0;
 
 static void _linux_misc_misc(const char *name, unsigned long addr)
 {
     kfunc_match(panic, name, addr);
-    kfunc_match(call_usermodehelper, name, addr);
-    kfunc_match(get_random_bytes, name, addr);
+    // kfunc_match(call_usermodehelper, name, addr);
+    // kfunc_match(get_random_bytes, name, addr);
+    // kfunc_match(get_random_u64, name, addr);
+    // kfunc_match(get_random_long, name, addr);
 }
 
 // linux/bottom_half.h

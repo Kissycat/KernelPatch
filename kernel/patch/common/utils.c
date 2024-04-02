@@ -96,6 +96,8 @@ KP_EXPORT_SYMBOL(compat_copy_to_user);
 
 long compact_strncpy_from_user(char *dest, const char __user *src, long count)
 {
+    kfunc_call(strncpy_from_user_nofault, dest, src, count);
+    kfunc_call(strncpy_from_unsafe_user, dest, src, count);
     if (kfunc(strncpy_from_user)) {
         long rc = kfunc(strncpy_from_user)(dest, src, count);
         if (rc >= count) {
@@ -106,8 +108,6 @@ long compact_strncpy_from_user(char *dest, const char __user *src, long count)
         }
         return rc;
     }
-    kfunc_call(compact_strncpy_from_user, dest, src, count);
-    kfunc_call(strncpy_from_unsafe_user, dest, src, count);
     return 0;
 }
 KP_EXPORT_SYMBOL(compact_strncpy_from_user);
@@ -151,17 +151,8 @@ KP_EXPORT_SYMBOL(copy_to_user_stack);
 
 uint64_t get_random_u64(void)
 {
-    // kfunc_call(get_random_u64);
-    // kfunc_call(get_random_long);
-    // _rand_next = 1103515245 * _rand_next + 12345;
-    // return _rand_next;
+    kfunc_call(get_random_u64);
+    kfunc_call(get_random_long);
+    return rand_next();
 }
-
-char *random_string(int len)
-{
-    char buff[128];
-    if (kfunc(get_random_bytes)) {
-        get_random_bytes(buff, len);
-    } else {
-    }
-}
+KP_EXPORT_SYMBOL(get_random_u64);

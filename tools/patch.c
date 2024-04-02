@@ -150,7 +150,7 @@ void print_preset_info(preset_t *preset)
 
     // todo: remove compat version
     if (ver_num > 0xa04) {
-        char *hexstr = bytes_to_hexstr(setup->superkey_hash, ROOT_SUPER_KEY_HASH_LEN);
+        char *hexstr = bytes_to_hexstr(setup->root_superkey, ROOT_SUPER_KEY_HASH_LEN);
         fprintf(stdout, "root_superkey=%s\n", hexstr);
         free(hexstr);
     }
@@ -557,8 +557,8 @@ int patch_update_img(const char *kimg_path, const char *kpimg_path, const char *
         sha256_init(&ctx);
         sha256_update(&ctx, (const BYTE *)superkey, strnlen(superkey, SUPER_KEY_LEN));
         sha256_final(&ctx, buf);
-        memcpy(setup->superkey_hash, buf, len);
-        char *hexstr = bytes_to_hexstr(setup->superkey_hash, len);
+        memcpy(setup->root_superkey, buf, len);
+        char *hexstr = bytes_to_hexstr(setup->root_superkey, len);
         tools_logi("root superkey hash: %s\n", hexstr);
         free(hexstr);
     }

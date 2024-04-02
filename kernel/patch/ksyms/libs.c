@@ -21,32 +21,23 @@ static void _linux_lib_misc(const char *name, unsigned long addr)
 
 #include <linux/uaccess.h>
 
-long kfunc_def(compact_strncpy_from_user)(char *dst, const void __user *unsafe_addr, long count) = 0;
-KP_EXPORT_SYMBOL(kfunc(compact_strncpy_from_user));
+long kfunc_def(strncpy_from_user_nofault)(char *dst, const void __user *unsafe_addr, long count) = 0;
 long kfunc_def(strncpy_from_unsafe_user)(char *dst, const void __user *unsafe_addr, long count) = 0;
-KP_EXPORT_SYMBOL(kfunc(strncpy_from_unsafe_user));
 long kfunc_def(strncpy_from_user)(char *dest, const char __user *src, long count) = 0;
-KP_EXPORT_SYMBOL(kfunc(strncpy_from_user));
+
 long kfunc_def(strnlen_user_nofault)(const void __user *unsafe_addr, long count) = 0;
-KP_EXPORT_SYMBOL(kfunc(strnlen_user_nofault));
 long kfunc_def(strnlen_unsafe_user)(const void __user *unsafe_addr, long count) = 0;
-KP_EXPORT_SYMBOL(kfunc(strnlen_unsafe_user));
 long kfunc_def(strnlen_user)(const char __user *str, long n);
-KP_EXPORT_SYMBOL(kfunc(strnlen_user));
 
 static void _linux_lib_strncpy_from_user_sym_match(const char *name, unsigned long addr)
 {
-    kfunc_match(compact_strncpy_from_user, name, addr);
-    if (!kfunc(compact_strncpy_from_user)) {
-        kfunc_match(strncpy_from_unsafe_user, name, addr);
-    }
+    kfunc_match(strncpy_from_user_nofault, name, addr);
+    kfunc_match(strncpy_from_unsafe_user, name, addr);
     kfunc_match(strncpy_from_user, name, addr);
 
-    kfunc_match(strnlen_user_nofault, name, addr);
-    if (!kfunc(strnlen_user_nofault)) {
-        kfunc_match(strnlen_unsafe_user, name, addr);
-    }
-    kfunc_match(strnlen_user, name, addr);
+    // kfunc_match(strnlen_user_nofault, name, addr);
+    // kfunc_match(strnlen_unsafe_user, name, addr);
+    // kfunc_match(strnlen_user, name, addr);
 }
 
 // lib/string.c

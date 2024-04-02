@@ -14,11 +14,4 @@ extern void kfunc_def(get_random_bytes)(void *buf, int nbytes);
 extern uint64_t kfunc_def(get_random_u64)(void);
 extern uint64_t kfunc_def(get_random_long)(void);
 
-static inline void get_random_bytes(void *buf, int nbytes)
-{
-    kfunc_call_void(get_random_bytes, buf, nbytes);
-}
-
-uint64_t get_random_u64(void);
-
 #endif

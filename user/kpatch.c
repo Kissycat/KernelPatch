@@ -76,8 +76,7 @@ static void usage(int status)
                         "help                           Print this help message. \n"
                         "get                            Print current superkey.\n"
                         "set <SUPERKEY>                 Set current superkey.\n"
-                        "rand                           Randomize current superkey.\n"
-                        "root [enable|disable]          Whether to use hash to verify the root superkey.\n"
+                        "rootkey [enable|disable]       Whether to use hash to verify the root superkey.\n"
                         "");
     }
     exit(status);
@@ -97,8 +96,7 @@ int skey_main(int argc, char **argv)
     } cmd_arr[] = {
         { "get", SUPERCALL_SKEY_GET },
         { "set", SUPERCALL_SKEY_SET },
-        { "rand", SUPERCALL_SKEY_RAND },
-        { "root", SUPERCALL_SKEY_ROOT_ENABLE },
+        { "rootkey", SUPERCALL_SKEY_ROOT_ENABLE },
         { "help", 0 },
     };
 
@@ -120,8 +118,6 @@ int skey_main(int argc, char **argv)
         if (argc < 3) error(-EINVAL, 0, "no new superkey");
         const char *new_key = argv[2];
         return sc_skey_set(key, new_key);
-    case SUPERCALL_SKEY_RAND:
-        return sc_skey_rand(key);
     case SUPERCALL_SKEY_ROOT_ENABLE:
         if (argc < 3) error(-EINVAL, 0, "no enable or disable specified");
         if (!strcmp("enable", argv[2])) {

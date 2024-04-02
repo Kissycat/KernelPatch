@@ -103,9 +103,9 @@ start_prepare:
     mov x2, #SUPER_KEY_LEN
     bl memcpy8
 
-    // memcpy(start_preset.superkey_hash, setup_preset.superkey_hash, ROOT_SUPER_KEY_HASH_LEN);
-    add x0, x11, #start_superkey_hash_offset;
-    add x1, x10, #setup_superkey_hash_offset
+    // memcpy(start_preset.root_superkey, setup_preset.root_superkey, ROOT_SUPER_KEY_HASH_LEN);
+    add x0, x11, #start_root_superkey_offset;
+    add x1, x10, #setup_root_superkey_offset
     mov x2, #ROOT_SUPER_KEY_HASH_LEN
     bl memcpy8
 

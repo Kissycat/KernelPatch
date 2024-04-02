@@ -72,13 +72,6 @@ static inline uint32_t sc_skey_set(const char *key, const char *new_key)
     return (uint32_t)ret;
 }
 
-static inline uint32_t sc_skey_rand(const char *key)
-{
-    if (!key || !key[0]) return -EINVAL;
-    long ret = syscall(__NR_supercall, key, ver_and_cmd(key, SUPERCALL_SKEY_RAND));
-    return (uint32_t)ret;
-}
-
 static inline uint32_t sc_skey_root_enable(const char *key, bool enable)
 {
     if (!key || !key[0]) return -EINVAL;

@@ -15,11 +15,13 @@
 extern start_preset_t start_preset;
 
 static char *superkey = 0;
-static char *superkey_hash = 0;
+static char *root_superkey = 0;
 static struct patch_symbol *patch_symbol = 0;
 
-uint64_t _rand_next = 1000000007;
-int skip_hash_auth = 0;
+static const char bstr[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+static uint64_t _rand_next = 1000000007;
+static int enable_root_key = 1;
 
 int auth_superkey(const char *key)
 {
@@ -27,7 +29,7 @@ int auth_superkey(const char *key)
     rc = lib_strncmp(superkey, key, SUPER_KEY_LEN);
     if (!rc) return rc;
 
-    if (skip_hash_auth) return rc;
+    if (!enable_root_key) return rc;
 
     BYTE hash[SHA256_BLOCK_SIZE];
     SHA256_CTX ctx;
@@ -35,19 +37,20 @@ int auth_superkey(const char *key)
     sha256_update(&ctx, (const BYTE *)key, lib_strnlen(key, SUPER_KEY_LEN));
     sha256_final(&ctx, hash);
     int len = SHA256_BLOCK_SIZE > ROOT_SUPER_KEY_HASH_LEN ? ROOT_SUPER_KEY_HASH_LEN : SHA256_BLOCK_SIZE;
-    rc = lib_memcmp(superkey_hash, hash, len);
+    rc = lib_memcmp(root_superkey, hash, len);
 
     return rc;
 }
 
 void reset_superkey(const char *key)
 {
-    lib_strncpy(superkey, key, SUPER_KEY_LEN);
+    lib_strncpy(superkey, key, SUPER_KEY_LEN - 1);
+    superkey[SUPER_KEY_LEN - 1] = '\0';
 }
 
-void skip_hash_auth_superkey(int skip_hash)
+void enable_auth_root_key(int enable)
 {
-    skip_hash_auth = skip_hash;
+    enable_root_key = enable;
 }
 
 uint64_t rand_next()
@@ -91,10 +94,10 @@ int on_each_extra_item(int (*callback)(const patch_extra_item_t *extra, const ch
 void predata_init()
 {
     superkey = (char *)start_preset.superkey;
-    superkey_hash = (char *)start_preset.superkey_hash;
+    root_superkey = (char *)start_preset.root_superkey;
     char *compile_time = start_preset.header.compile_time;
 
-    // RNG, relies on KASLR
+    // RNG
     _rand_next *= kernel_va;
     _rand_next *= kver;
     _rand_next *= kpver;
@@ -102,13 +105,15 @@ void predata_init()
     _rand_next *= _kp_region_end;
     if (*(uint64_t *)compile_time) _rand_next *= *(uint64_t *)compile_time;
     if (*(uint64_t *)(superkey)) _rand_next *= *(uint64_t *)(superkey);
-    if (*(uint64_t *)(superkey_hash)) _rand_next *= *(uint64_t *)(superkey_hash);
+    if (*(uint64_t *)(root_superkey)) _rand_next *= *(uint64_t *)(root_superkey);
 
     // random key
     if (lib_strnlen(superkey, SUPER_KEY_LEN) <= 0) {
-        for (int i = 0; i < 16; ++i) {
-            uint64_t rand = rand_next() % ('z' - '0' + 1);
-            superkey[i] = (char)('0' + rand);
+        int len = SUPER_KEY_LEN > 16 ? 16 : SUPER_KEY_LEN;
+        len--;
+        for (int i = 0; i < len; ++i) {
+            uint64_t rand = rand_next() % (sizeof(bstr) - 1);
+            superkey[i] = bstr[rand];
         }
     }
     log_boot("gen rand key: %s\n", superkey);

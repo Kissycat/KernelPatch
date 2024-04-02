@@ -11,7 +11,7 @@
 
 int auth_superkey(const char *key);
 void reset_superkey(const char *key);
-void skip_hash_auth_superkey(int skip_hash);
+void enable_auth_root_key(int skip_hash);
 const char *get_superkey();
 
 uint64_t rand_next();

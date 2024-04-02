@@ -27,6 +27,8 @@
 #include <linux/slab.h>
 #include <kputils.h>
 #include <pidmem.h>
+#include <predata.h>
+#include <linux/random.h>
 
 #define MAX_KEY_LEN 128
 
@@ -34,19 +36,19 @@
 
 static long call_test(long arg1, long arg2, long arg3)
 {
-    char *cmd = "/system/bin/touch";
-    // const char *superkey = get_superkey();
-    char *argv[] = {
-        cmd,
-        "/data/local/tmp/test.txt",
-        NULL,
-    };
-    char *envp[] = {
-        "PATH=/system/bin:/data/adb",
-        NULL,
-    };
-    int rc = call_usermodehelper(cmd, argv, envp, UMH_WAIT_PROC);
-    log_boot("user_init: %d\n", rc);
+    // char *cmd = "/system/bin/touch";
+    // // const char *superkey = get_superkey();
+    // char *argv[] = {
+    //     cmd,
+    //     "/data/local/tmp/test.txt",
+    //     NULL,
+    // };
+    // char *envp[] = {
+    //     "PATH=/system/bin:/data/adb",
+    //     NULL,
+    // };
+    // int rc = call_usermodehelper(cmd, argv, envp, UMH_WAIT_PROC);
+    // log_boot("user_init: %d\n", rc);
     return 0;
 }
 
@@ -127,11 +129,6 @@ static long call_kpm_info(const char *__user uname, char *__user out_info, int o
     return sz;
 }
 
-static unsigned long call_pid_virt_to_phys(pid_t pid, uintptr_t vaddr)
-{
-    return pid_virt_to_phys(pid, vaddr);
-}
-
 static long call_su(struct su_profile *__user uprofile)
 {
     struct su_profile *profile = memdup_user(uprofile, sizeof(struct su_profile));
@@ -152,6 +149,35 @@ static long call_su_task(pid_t pid, struct su_profile *__user uprofile)
     return rc;
 }
 
+static long call_skey_get(char *__user out_key, int out_len)
+{
+    const char *key = get_superkey();
+    int klen = strlen(key);
+    if (klen >= out_len) return -ENOMEM;
+    int rc = compat_copy_to_user(out_key, get_superkey(), klen + 1);
+    return rc;
+}
+
+static long call_skey_set(char *__user new_key)
+{
+    char buf[SUPER_KEY_LEN];
+    int len = compact_strncpy_from_user(buf, new_key, sizeof(buf));
+    if (len >= SUPER_KEY_LEN && buf[SUPER_KEY_LEN - 1]) return -E2BIG;
+    reset_superkey(new_key);
+    return 0;
+}
+
+static long call_skey_root_enable(int enable)
+{
+    enable_auth_root_key(enable);
+    return 0;
+}
+
+static unsigned long call_pid_virt_to_phys(pid_t pid, uintptr_t vaddr)
+{
+    return pid_virt_to_phys(pid, vaddr);
+}
+
 static long supercall(long cmd, long arg1, long arg2, long arg3, long arg4)
 {
     switch (cmd) {
@@ -168,12 +194,11 @@ static long supercall(long cmd, long arg1, long arg2, long arg3, long arg4)
 
     switch (cmd) {
     case SUPERCALL_SKEY_GET:
-        break;
+        return call_skey_get((char *__user)arg1, (int)arg2);
     case SUPERCALL_SKEY_SET:
-        break;
-    case SUPERCALL_SKEY_RAND:
-        break;
+        return call_skey_set((char *__user)arg1);
     case SUPERCALL_SKEY_ROOT_ENABLE:
+        return call_skey_root_enable((int)arg1);
         break;
     }
 
@@ -204,6 +229,7 @@ static long supercall(long cmd, long arg1, long arg2, long arg3, long arg4)
     case SUPERCALL_TEST:
         return call_test(arg1, arg2, arg3);
     }
+
 #ifdef ANDROID
     return supercall_android(cmd, arg1, arg2, arg3);
 #endif
@@ -214,19 +240,23 @@ static void before(hook_fargs6_t *args, void *udata)
 {
     const char *__user ukey = (const char *__user)syscall_argn(args, 0);
     long ver_xx_cmd = (long)syscall_argn(args, 1);
-    long a1 = (long)syscall_argn(args, 2);
-    long a2 = (long)syscall_argn(args, 3);
-    long a3 = (long)syscall_argn(args, 4);
-    long a4 = (long)syscall_argn(args, 5);
 
+    // todo: from 0.10.5
     // uint32_t ver = (ver_xx_cmd & 0xFFFFFFFF00000000ul) >> 32;
     // long xx = (ver_xx_cmd & 0xFFFF0000) >> 16;
+
     long cmd = ver_xx_cmd & 0xFFFF;
+    if (cmd < SUPERCALL_HELLO || cmd > SUPERCALL_MAX) return;
 
     char key[MAX_KEY_LEN];
     long len = compact_strncpy_from_user(key, ukey, MAX_KEY_LEN);
     if (len <= 0) return;
     if (auth_superkey(key)) return;
+
+    long a1 = (long)syscall_argn(args, 2);
+    long a2 = (long)syscall_argn(args, 3);
+    long a3 = (long)syscall_argn(args, 4);
+    long a4 = (long)syscall_argn(args, 5);
 
     args->skip_origin = 1;
     args->ret = supercall(cmd, a1, a2, a3, a4);
