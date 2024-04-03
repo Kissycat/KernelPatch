@@ -68,7 +68,7 @@ static long call_panic()
 static long call_klog(const char __user *arg1)
 {
     char buf[1024];
-    long len = compact_strncpy_from_user(buf, arg1, sizeof(buf));
+    long len = compat_strncpy_from_user(buf, arg1, sizeof(buf));
     if (len <= 0) return -EINVAL;
     if (len > 0) logki("user log: %s", buf);
     return 0;
@@ -77,25 +77,25 @@ static long call_klog(const char __user *arg1)
 static long call_kpm_load(const char __user *arg1, const char *__user arg2, void *__user reserved)
 {
     char path[1024], args[KPM_ARGS_LEN];
-    long pathlen = compact_strncpy_from_user(path, arg1, sizeof(path));
+    long pathlen = compat_strncpy_from_user(path, arg1, sizeof(path));
     if (pathlen <= 0) return -EINVAL;
-    long arglen = compact_strncpy_from_user(args, arg2, sizeof(args));
+    long arglen = compat_strncpy_from_user(args, arg2, sizeof(args));
     return load_module_path(path, arglen <= 0 ? 0 : args, reserved);
 }
 
 static long call_kpm_control(const char __user *arg1, const char *__user arg2, void *__user out_msg, int outlen)
 {
     char name[KPM_NAME_LEN], args[KPM_ARGS_LEN];
-    long namelen = compact_strncpy_from_user(name, arg1, sizeof(name));
+    long namelen = compat_strncpy_from_user(name, arg1, sizeof(name));
     if (namelen <= 0) return -EINVAL;
-    long arglen = compact_strncpy_from_user(args, arg2, sizeof(args));
+    long arglen = compat_strncpy_from_user(args, arg2, sizeof(args));
     return module_control0(name, arglen <= 0 ? 0 : args, out_msg, outlen);
 }
 
 static long call_kpm_unload(const char *__user arg1, void *__user reserved)
 {
     char name[KPM_NAME_LEN];
-    long len = compact_strncpy_from_user(name, arg1, sizeof(name));
+    long len = compat_strncpy_from_user(name, arg1, sizeof(name));
     if (len <= 0) return -EINVAL;
     return unload_module(name, reserved);
 }
@@ -120,7 +120,7 @@ static long call_kpm_info(const char *__user uname, char *__user out_info, int o
     if (out_len <= 0) return -EINVAL;
     char name[64];
     char buf[2048];
-    int len = compact_strncpy_from_user(name, uname, sizeof(name));
+    int len = compat_strncpy_from_user(name, uname, sizeof(name));
     if (len <= 0) return -EINVAL;
     int sz = get_module_info(name, buf, sizeof(buf));
     if (sz < 0) return sz;
@@ -161,7 +161,7 @@ static long call_skey_get(char *__user out_key, int out_len)
 static long call_skey_set(char *__user new_key)
 {
     char buf[SUPER_KEY_LEN];
-    int len = compact_strncpy_from_user(buf, new_key, sizeof(buf));
+    int len = compat_strncpy_from_user(buf, new_key, sizeof(buf));
     if (len >= SUPER_KEY_LEN && buf[SUPER_KEY_LEN - 1]) return -E2BIG;
     reset_superkey(new_key);
     return 0;
@@ -249,7 +249,7 @@ static void before(hook_fargs6_t *args, void *udata)
     if (cmd < SUPERCALL_HELLO || cmd > SUPERCALL_MAX) return;
 
     char key[MAX_KEY_LEN];
-    long len = compact_strncpy_from_user(key, ukey, MAX_KEY_LEN);
+    long len = compat_strncpy_from_user(key, ukey, MAX_KEY_LEN);
     if (len <= 0) return;
     if (auth_superkey(key)) return;
 

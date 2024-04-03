@@ -94,7 +94,7 @@ KP_EXPORT_SYMBOL(compat_copy_to_user);
 
 #include <linux/uaccess.h>
 
-long compact_strncpy_from_user(char *dest, const char __user *src, long count)
+long compat_strncpy_from_user(char *dest, const char __user *src, long count)
 {
     kfunc_call(strncpy_from_user_nofault, dest, src, count);
     kfunc_call(strncpy_from_unsafe_user, dest, src, count);
@@ -110,7 +110,7 @@ long compact_strncpy_from_user(char *dest, const char __user *src, long count)
     }
     return 0;
 }
-KP_EXPORT_SYMBOL(compact_strncpy_from_user);
+KP_EXPORT_SYMBOL(compat_strncpy_from_user);
 
 int16_t pt_regs_offset = -1;
 

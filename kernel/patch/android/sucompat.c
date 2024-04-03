@@ -259,7 +259,7 @@ static void handle_before_execve(hook_local_t *hook_local, char **__user u_filen
 
     char __user *ufilename = *u_filename_p;
     char filename[SU_PATH_MAX_LEN];
-    int flen = compact_strncpy_from_user(filename, ufilename, sizeof(filename));
+    int flen = compat_strncpy_from_user(filename, ufilename, sizeof(filename));
     if (flen <= 0) return;
 
     if (!strcmp(current_su_path, filename)) {
@@ -341,7 +341,7 @@ static void handle_before_execve(hook_local_t *hook_local, char **__user u_filen
 
         // auth key
         char arg1[SUPER_KEY_LEN];
-        if (compact_strncpy_from_user(arg1, p1, sizeof(arg1)) <= 0) return;
+        if (compat_strncpy_from_user(arg1, p1, sizeof(arg1)) <= 0) return;
         if (auth_superkey(arg1)) return;
 
         commit_su(0, 0);
@@ -355,7 +355,7 @@ static void handle_before_execve(hook_local_t *hook_local, char **__user u_filen
 
         if (p1 && !IS_ERR(p2)) {
             char buffer[EMBEDDED_NAME_MAX];
-            int len = compact_strncpy_from_user(buffer, p2, EMBEDDED_NAME_MAX);
+            int len = compat_strncpy_from_user(buffer, p2, EMBEDDED_NAME_MAX);
             if (len >= 0) {
                 exec = buffer;
                 exec_len = len;
@@ -447,7 +447,7 @@ static void su_handler_arg1_ufilename_before(hook_fargs6_t *args, void *udata)
 
     char __user *ufilename = (char __user *)syscall_argn(args, 1);
     char filename[SU_PATH_MAX_LEN];
-    int flen = compact_strncpy_from_user(filename, ufilename, sizeof(filename));
+    int flen = compat_strncpy_from_user(filename, ufilename, sizeof(filename));
     if (flen <= 0) return;
 
     if (!strcmp(current_su_path, filename)) {

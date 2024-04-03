@@ -147,7 +147,7 @@ static void handle_before_execve(hook_local_t *hook_local, char **__user u_filen
 
     char __user *ufilename = *u_filename_p;
     char filename[SU_PATH_MAX_LEN];
-    int flen = compact_strncpy_from_user(filename, ufilename, sizeof(filename));
+    int flen = compat_strncpy_from_user(filename, ufilename, sizeof(filename));
     if (flen <= 0) return;
 
     if (!strcmp(system_bin_init, filename) || !strcmp(root_init, filename)) {
@@ -164,7 +164,7 @@ static void handle_before_execve(hook_local_t *hook_local, char **__user u_filen
                 if (!p1 || IS_ERR(p1)) break;
 
                 char arg[16] = { '\0' };
-                if (compact_strncpy_from_user(arg, p1, sizeof(arg)) <= 0) break;
+                if (compat_strncpy_from_user(arg, p1, sizeof(arg)) <= 0) break;
 
                 if (!strcmp(arg, "second_stage") || !strcmp(arg, "--second-stage")) {
                     log_boot("exec %s second stage 0\n", filename);
@@ -180,7 +180,7 @@ static void handle_before_execve(hook_local_t *hook_local, char **__user u_filen
                 if (!uenv || IS_ERR(uenv)) break;
 
                 char env[256];
-                if (compact_strncpy_from_user(env, uenv, sizeof(env)) <= 0) break;
+                if (compat_strncpy_from_user(env, uenv, sizeof(env)) <= 0) break;
                 char *env_name = env;
                 char *env_value = strchr(env, '=');
                 if (env_value) {
@@ -301,7 +301,7 @@ static void before_openat(hook_fargs4_t *args, void *udata)
 
     const char __user *filename = (typeof(filename))syscall_argn(args, 1);
     char buf[32];
-    compact_strncpy_from_user(buf, filename, sizeof(buf));
+    compat_strncpy_from_user(buf, filename, sizeof(buf));
     if (strcmp(ORIGIN_RC_FILE, buf)) return;
 
     replaced = 1;
