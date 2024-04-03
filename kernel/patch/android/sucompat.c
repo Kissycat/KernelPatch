@@ -312,19 +312,22 @@ static void handle_before_execve(hook_local_t *hook_local, char **__user u_filen
 
             // argv
             int argv_cplen = 0;
+            if (strcmp(legacy_su_path, filename)) {
 #ifdef TRY_DIRECT_MODIFY_USER
-            const char __user *p1 = get_user_arg_ptr(0, *uargv, 0);
-            argv_cplen = compat_copy_to_user((void *__user)p1, legacy_su_path, sizeof(legacy_su_path));
+                const char __user *p1 = get_user_arg_ptr(0, *uargv, 0);
+                argv_cplen = compat_copy_to_user((void *__user)p1, legacy_su_path, sizeof(legacy_su_path));
 #endif
-            if (argv_cplen <= 0) {
-                sp = sp ?: current_user_stack_pointer();
-                sp -= sizeof(legacy_su_path);
-                sp &= 0xFFFFFFFFFFFFFFF8;
-                argv_cplen = compat_copy_to_user((void *)sp, legacy_su_path, sizeof(legacy_su_path));
-                if (argv_cplen > 0) {
-                    int rc = set_user_arg_ptr(0, *uargv, 0, sp);
-                    if (rc < 0) { // todo: modify entire argv
-                        logkfi("call apd argv error, uid: %d, to_uid: %d, sctx: %s, rc: %d\n", uid, to_uid, sctx, rc);
+                if (argv_cplen <= 0) {
+                    sp = sp ?: current_user_stack_pointer();
+                    sp -= sizeof(legacy_su_path);
+                    sp &= 0xFFFFFFFFFFFFFFF8;
+                    argv_cplen = compat_copy_to_user((void *)sp, legacy_su_path, sizeof(legacy_su_path));
+                    if (argv_cplen > 0) {
+                        int rc = set_user_arg_ptr(0, *uargv, 0, sp);
+                        if (rc < 0) { // todo: modify entire argv
+                            logkfi("call apd argv error, uid: %d, to_uid: %d, sctx: %s, rc: %d\n", uid, to_uid, sctx,
+                                   rc);
+                        }
                     }
                 }
             }
