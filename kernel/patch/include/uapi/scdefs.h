@@ -71,7 +71,9 @@ struct su_profile
 #define ANDROID_LEGACY_SU_PATH "/system/bin/su"
 #define KPATCH_DATA_PATH "/data/adb/kpatch"
 #define KPATCH_DEV_PATH "/dev/kpatch"
-#define KPATCH_DEV_WORK_DIR "/dev/kpatch_work/"
+#define KPATCH_DEV_WORK_DIR "/dev/kp/"
+#define KERNELPATCH_DATA_DIR "/data/adb/kp"
+#define KERNELPATCH_MODULE_DATA_DIR KERNELPATCH_DATA_DIR "/modules"
 #define APD_PATH "/data/adb/apd"
 #define SUPERCMD "/system/bin/truncate"
 
