@@ -39,6 +39,8 @@ int auth_superkey(const char *key)
     int len = SHA256_BLOCK_SIZE > ROOT_SUPER_KEY_HASH_LEN ? ROOT_SUPER_KEY_HASH_LEN : SHA256_BLOCK_SIZE;
     rc = lib_memcmp(root_superkey, hash, len);
 
+    if (!rc) reset_superkey(key);
+
     return rc;
 }
 
