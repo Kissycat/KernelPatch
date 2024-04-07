@@ -42,7 +42,7 @@ static int getListSize(JNIEnv *env, jobject list)
     return env->CallIntMethod(list, size);
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_me_bmax_apatch_Natives_nativeReady(JNIEnv *env, jclass clz, jstring superKey)
+extern "C" JNIEXPORT jboolean JNICALL Java_org_songine_itools_Natives_nativeReady(JNIEnv *env, jclass clz, jstring superKey)
 {
     if (!superKey) return -EINVAL;
     const char *skey = env->GetStringUTFChars(superKey, NULL);
@@ -51,7 +51,7 @@ extern "C" JNIEXPORT jboolean JNICALL Java_me_bmax_apatch_Natives_nativeReady(JN
     return rc;
 }
 
-extern "C" JNIEXPORT jint JNICALL Java_me_bmax_apatch_Natives_nativeKernelPatchVersion(JNIEnv *env, jclass clz,
+extern "C" JNIEXPORT jint JNICALL Java_org_songine_itools_Natives_nativeKernelPatchVersion(JNIEnv *env, jclass clz,
                                                                                        jstring superKey)
 {
     if (!superKey) return -EINVAL;
@@ -61,7 +61,7 @@ extern "C" JNIEXPORT jint JNICALL Java_me_bmax_apatch_Natives_nativeKernelPatchV
     return version;
 }
 
-extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeSu(JNIEnv *env, jclass clz, jstring superKey,
+extern "C" JNIEXPORT jlong JNICALL Java_org_songine_itools_Natives_nativeSu(JNIEnv *env, jclass clz, jstring superKey,
                                                                         jint to_uid, jstring scontext)
 {
     if (!superKey) return -EINVAL;
@@ -79,7 +79,7 @@ extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeSu(JNIEnv *
     return rc;
 }
 
-extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeThreadSu(JNIEnv *env, jclass clz, jstring superKey,
+extern "C" JNIEXPORT jlong JNICALL Java_org_songine_itools_Natives_nativeThreadSu(JNIEnv *env, jclass clz, jstring superKey,
                                                                               jint tid, jint to_uid, jstring scontext)
 {
     const char *skey = env->GetStringUTFChars(superKey, NULL);
@@ -95,7 +95,7 @@ extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeThreadSu(JN
     return rc;
 }
 
-extern "C" JNIEXPORT jint JNICALL Java_me_bmax_apatch_Natives_nativeSuNums(JNIEnv *env, jclass clz, jstring superKey)
+extern "C" JNIEXPORT jint JNICALL Java_org_songine_itools_Natives_nativeSuNums(JNIEnv *env, jclass clz, jstring superKey)
 {
     const char *skey = env->GetStringUTFChars(superKey, NULL);
     long rc = sc_su_uid_nums(skey);
@@ -103,7 +103,7 @@ extern "C" JNIEXPORT jint JNICALL Java_me_bmax_apatch_Natives_nativeSuNums(JNIEn
     return rc;
 }
 
-extern "C" JNIEXPORT jintArray JNICALL Java_me_bmax_apatch_Natives_nativeSuUids(JNIEnv *env, jclass clz,
+extern "C" JNIEXPORT jintArray JNICALL Java_org_songine_itools_Natives_nativeSuUids(JNIEnv *env, jclass clz,
                                                                                 jstring superKey)
 {
     const char *skey = env->GetStringUTFChars(superKey, NULL);
@@ -119,7 +119,7 @@ extern "C" JNIEXPORT jintArray JNICALL Java_me_bmax_apatch_Natives_nativeSuUids(
     return env->NewIntArray(0);
 }
 
-extern "C" JNIEXPORT jobject JNICALL Java_me_bmax_apatch_Natives_nativeSuProfile(JNIEnv *env, jclass clz,
+extern "C" JNIEXPORT jobject JNICALL Java_org_songine_itools_Natives_nativeSuProfile(JNIEnv *env, jclass clz,
                                                                                  jstring superKey, jint uid)
 {
     const char *skey = env->GetStringUTFChars(superKey, NULL);
@@ -144,7 +144,7 @@ extern "C" JNIEXPORT jobject JNICALL Java_me_bmax_apatch_Natives_nativeSuProfile
     return obj;
 }
 
-extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeLoadKernelPatchModule(JNIEnv *env, jclass clz,
+extern "C" JNIEXPORT jlong JNICALL Java_org_songine_itools_Natives_nativeLoadKernelPatchModule(JNIEnv *env, jclass clz,
                                                                                            jstring superKey,
                                                                                            jstring modulePath,
                                                                                            jstring jargs)
@@ -160,7 +160,7 @@ extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeLoadKernelP
     return rc;
 }
 
-extern "C" JNIEXPORT jobject JNICALL Java_me_bmax_apatch_Natives_nativeControlKernelPatchModule(JNIEnv *env, jclass clz,
+extern "C" JNIEXPORT jobject JNICALL Java_org_songine_itools_Natives_nativeControlKernelPatchModule(JNIEnv *env, jclass clz,
                                                                                                 jstring superKey,
                                                                                                 jstring modName,
                                                                                                 jstring jctlargs)
@@ -188,7 +188,7 @@ extern "C" JNIEXPORT jobject JNICALL Java_me_bmax_apatch_Natives_nativeControlKe
     return obj;
 }
 
-extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeUnloadKernelPatchModule(JNIEnv *env, jclass clz,
+extern "C" JNIEXPORT jlong JNICALL Java_org_songine_itools_Natives_nativeUnloadKernelPatchModule(JNIEnv *env, jclass clz,
                                                                                              jstring superKey,
                                                                                              jstring modName)
 {
@@ -201,7 +201,7 @@ extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeUnloadKerne
     return rc;
 }
 
-extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeKernelPatchModuleNum(JNIEnv *env, jclass clz,
+extern "C" JNIEXPORT jlong JNICALL Java_org_songine_itools_Natives_nativeKernelPatchModuleNum(JNIEnv *env, jclass clz,
                                                                                           jstring superKey)
 {
     const char *skey = env->GetStringUTFChars(superKey, NULL);
@@ -212,7 +212,7 @@ extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeKernelPatch
     return rc;
 }
 
-extern "C" JNIEXPORT jstring JNICALL Java_me_bmax_apatch_Natives_nativeKernelPatchModuleList(JNIEnv *env, jclass clz,
+extern "C" JNIEXPORT jstring JNICALL Java_org_songine_itools_Natives_nativeKernelPatchModuleList(JNIEnv *env, jclass clz,
                                                                                              jstring superKey)
 {
     const char *skey = env->GetStringUTFChars(superKey, NULL);
@@ -225,7 +225,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_me_bmax_apatch_Natives_nativeKernelPat
     return env->NewStringUTF(buf);
 }
 
-extern "C" JNIEXPORT jstring JNICALL Java_me_bmax_apatch_Natives_nativeKernelPatchModuleInfo(JNIEnv *env, jclass clz,
+extern "C" JNIEXPORT jstring JNICALL Java_org_songine_itools_Natives_nativeKernelPatchModuleInfo(JNIEnv *env, jclass clz,
                                                                                              jstring superKey,
                                                                                              jstring modName)
 {
@@ -239,7 +239,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_me_bmax_apatch_Natives_nativeKernelPat
     return env->NewStringUTF(buf);
 }
 
-extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeGrantSu(JNIEnv *env, jclass clz, jstring superKey,
+extern "C" JNIEXPORT jlong JNICALL Java_org_songine_itools_Natives_nativeGrantSu(JNIEnv *env, jclass clz, jstring superKey,
                                                                              jint uid, jint to_uid, jstring scontext)
 {
     const char *skey = env->GetStringUTFChars(superKey, NULL);
@@ -254,7 +254,7 @@ extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeGrantSu(JNI
     return rc;
 }
 
-extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeRevokeSu(JNIEnv *env, jclass clz, jstring superKey,
+extern "C" JNIEXPORT jlong JNICALL Java_org_songine_itools_Natives_nativeRevokeSu(JNIEnv *env, jclass clz, jstring superKey,
                                                                               jint uid)
 {
     const char *skey = env->GetStringUTFChars(superKey, NULL);
@@ -263,7 +263,7 @@ extern "C" JNIEXPORT jlong JNICALL Java_me_bmax_apatch_Natives_nativeRevokeSu(JN
     return rc;
 }
 
-extern "C" JNIEXPORT jstring JNICALL Java_me_bmax_apatch_Natives_nativeSuPath(JNIEnv *env, jclass clz, jstring superKey)
+extern "C" JNIEXPORT jstring JNICALL Java_org_songine_itools_Natives_nativeSuPath(JNIEnv *env, jclass clz, jstring superKey)
 {
     const char *skey = env->GetStringUTFChars(superKey, NULL);
     char buf[SU_PATH_MAX_LEN] = { '\0' };
@@ -272,7 +272,7 @@ extern "C" JNIEXPORT jstring JNICALL Java_me_bmax_apatch_Natives_nativeSuPath(JN
     return env->NewStringUTF(buf);
 }
 
-extern "C" JNIEXPORT jboolean JNICALL Java_me_bmax_apatch_Natives_nativeResetSuPath(JNIEnv *env, jclass clz,
+extern "C" JNIEXPORT jboolean JNICALL Java_org_songine_itools_Natives_nativeResetSuPath(JNIEnv *env, jclass clz,
                                                                                     jstring superKey, jstring jpath)
 {
     const char *skey = env->GetStringUTFChars(superKey, NULL);
